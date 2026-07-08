@@ -12,6 +12,6 @@ class DataLoader:
         if not file_path.exists():
             raise FileNotFoundError(f"{file_path} not found.")
 
-        df = pd.read_csv(file_path)
+        df = pd.read_csv(file_path, sep=";")
 
         return df
