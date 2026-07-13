@@ -2,19 +2,23 @@ class DecisionAgent:
 
     def make_decision(self, summary):
 
-        probability = summary["mean_fault_probability"]
+        mean_probability = summary["mean_fault_probability"]
+        max_probability = summary["max_fault_probability"]
 
-        if probability >= 0.85:
+        # Combined daily priority score: balance overall daily behaviour with severe spikes
+        priority_score = 0.7 * mean_probability + 0.3 * max_probability
+
+        if priority_score >= 0.75 and mean_probability >= 0.55:
             risk = "Critical"
             action = "Immediate Maintenance"
             priority = 4
 
-        elif probability >= 0.60:
+        elif priority_score >= 0.45 and mean_probability >= 0.20:
             risk = "High"
             action = "Schedule Maintenance"
             priority = 3
 
-        elif probability >= 0.30:
+        elif priority_score >= 0.20:
             risk = "Medium"
             action = "Increase Monitoring"
             priority = 2
@@ -27,5 +31,6 @@ class DecisionAgent:
         summary["risk_level"] = risk
         summary["recommended_action"] = action
         summary["priority_score"] = priority
+        summary["daily_priority_score"] = round(priority_score, 4)
 
         return summary
