@@ -38,22 +38,24 @@ class PredictionAgent:
         results["prediction"] = predictions
 
         return results
-    def summarize_window(self, prediction_results):
 
+    def summarize_day(self, prediction_results, selected_date):
         summary = {
+            "date": selected_date,
+            "max_fault_probability": prediction_results["fault_probability"].max(),
+            "mean_fault_probability": prediction_results["fault_probability"].mean(),
+            "predicted_faults": int(prediction_results["prediction"].sum()),
+            "records_analyzed": int(len(prediction_results))
+        }
 
-            "window_end":
-                prediction_results["time_stamp"].iloc[-1],
+        return summary
 
-            "max_fault_probability":
-                prediction_results["fault_probability"].max(),
-
-            "mean_fault_probability":
-                prediction_results["fault_probability"].mean(),
-
-            "predicted_faults":
-                int(prediction_results["prediction"].sum())
-
+    def summarize_window(self, prediction_results):
+        summary = {
+            "window_end": prediction_results["time_stamp"].iloc[-1],
+            "max_fault_probability": prediction_results["fault_probability"].max(),
+            "mean_fault_probability": prediction_results["fault_probability"].mean(),
+            "predicted_faults": int(prediction_results["prediction"].sum())
         }
 
         return summary
