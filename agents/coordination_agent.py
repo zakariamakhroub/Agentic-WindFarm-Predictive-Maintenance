@@ -6,7 +6,7 @@ class CoordinationAgent:
             decisions,
             key=lambda x: (
                 x["priority_score"],
-                x["max_fault_probability"]
+                x["mean_fault_probability"]
             ),
             reverse=True
         )
@@ -15,3 +15,4 @@ class CoordinationAgent:
             decision["rank"] = i
 
         return ranked
+    

@@ -2,7 +2,7 @@ class DecisionAgent:
 
     def make_decision(self, summary):
 
-        probability = summary["max_fault_probability"]
+        probability = summary["mean_fault_probability"]
 
         if probability >= 0.85:
             risk = "Critical"
