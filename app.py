@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_from_directory
 
 from preprocessing.load_data import DataLoader
 from preprocessing.data_cleaner import DataCleaner
@@ -12,6 +12,12 @@ from agents.memory_agent import MemoryAgent
 from agents.coordination_agent import CoordinationAgent
 
 app = Flask(__name__)
+
+
+@app.route("/images/<path:filename>")
+def images(filename):
+    # Serve images placed in preprocessing/image (logos, turbine images)
+    return send_from_directory("preprocessing/image", filename)
 
 
 def run_pipeline(selected_date: str):
