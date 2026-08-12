@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Wind Farm Predictive Maintenance Dashboard</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 24px;
+        background: #f4f7fb;
+        color: #1f2937;
+      }
+      .card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+      h1 { margin-top: 0; }
+      form { display: flex; gap: 12px; align-items: end; margin-bottom: 20px; }
+      label { display: flex; flex-direction: column; font-size: 14px; }
+      input { padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; }
+      button {
+        padding: 9px 14px; border: none; border-radius: 6px; background: #2563eb; color: white; cursor: pointer;
+      }
+      table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+      th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: left; }
+      .badge { padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: bold; }
+      .critical { background: #fee2e2; color: #991b1b; }
+      .high { background: #fef3c7; color: #92400e; }
+      .medium { background: #dbeafe; color: #1d4ed8; }
+      .low { background: #dcfce7; color: #166534; }
+      .error { color: #b91c1c; margin-top: 12px; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Wind Farm Predictive Maintenance Dashboard</h1>
+      <p>Review the ranked maintenance priorities for each turbine for a selected date.</p>
+
+      <form method="post">
+        <label>
+          Select date
+          <input type="date" name="selected_date" value="{{ selected_date }}">
+        </label>
+        <button type="submit">Generate report</button>
+      </form>
+
+      {% if error_message %}
+        <div class="error">{{ error_message }}</div>
+      {% endif %}
+
+      <table>
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Turbine</th>
+            <th>Mean Probability</th>
+            <th>Max Probability</th>
+            <th>Risk</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in ranked_schedule %}
+            <tr>
+              <td>{{ item.rank }}</td>
+              <td>{{ item.turbine_id }}</td>
+              <td>{{ "%.4f"|format(item.mean_fault_probability) }}</td>
+              <td>{{ "%.4f"|format(item.max_fault_probability) }}</td>
+              <td>
+                <span class="badge {{ item.risk_level.lower() }}">{{ item.risk_level }}</span>
+              </td>
+              <td>{{ item.recommended_action }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="6">No maintenance data available for this date.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>
