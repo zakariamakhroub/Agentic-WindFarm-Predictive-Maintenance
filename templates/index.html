@@ -6,59 +6,243 @@
     <title>Wind Farm Predictive Maintenance Dashboard</title>
     <style>
       body {
-        font-family: Arial, sans-serif;
+        font-family: "Inter", Arial, sans-serif;
         margin: 0;
         padding: 24px;
-        background: #f4f7fb;
-        color: #1f2937;
+        background: #eef2ff;
+        color: #0f172a;
       }
       .card {
         background: white;
-        border-radius: 12px;
-        padding: 20px;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-        max-width: 1100px;
+        border-radius: 24px;
+        padding: 28px;
+        box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
+        max-width: 1180px;
         margin: 0 auto;
       }
-      .header { display:flex; align-items:center; justify-content:space-between; gap:12px; }
-      .logo { max-height:56px; }
-      .hero { display:block; margin: 12px auto; max-height:140px; border-radius:8px; }
-      h1 { margin-top: 0; }
-      form { display: flex; gap: 12px; align-items: end; margin-bottom: 20px; }
-      label { display: flex; flex-direction: column; font-size: 14px; }
-      input { padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; }
-      button {
-        padding: 9px 14px; border: none; border-radius: 6px; background: #2563eb; color: white; cursor: pointer;
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 18px;
       }
-      table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-      th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: left; }
-      .badge { padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: bold; }
-      .critical { background: #fee2e2; color: #991b1b; }
-      .high { background: #fef3c7; color: #92400e; }
-      .medium { background: #dbeafe; color: #1d4ed8; }
-      .low { background: #dcfce7; color: #166534; }
-      .error { color: #b91c1c; margin-top: 12px; }
+      .title-group {
+        text-align: center;
+        flex: 1;
+      }
+      .title-group h1 {
+        margin: 0;
+        font-size: 2rem;
+        letter-spacing: -0.03em;
+      }
+      .subtitle {
+        margin: 10px auto 0;
+        color: #475569;
+        font-size: 0.98rem;
+        max-width: 520px;
+      }
+      .logo {
+        max-height: 56px;
+        object-fit: contain;
+      }
+      .hero {
+        display: block;
+        width: 100%;
+        max-height: 200px;
+        margin: 0 auto 24px;
+        object-fit: cover;
+        border-radius: 20px;
+      }
+      .controls-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        padding: 18px 22px;
+        margin-bottom: 24px;
+      }
+      .controls-form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        align-items: center;
+      }
+      .control-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      label {
+        color: #475569;
+        font-size: 0.95rem;
+      }
+      input {
+        padding: 12px 14px;
+        border: 1px solid #cbd5e1;
+        border-radius: 14px;
+        min-width: 200px;
+      }
+      button {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 14px;
+        background: #2563eb;
+        color: white;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .summary-cards {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+      .summary-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        padding: 18px 20px;
+      }
+      .summary-title {
+        display: block;
+        color: #64748b;
+        font-size: 0.82rem;
+        margin-bottom: 10px;
+      }
+      .summary-card strong {
+        font-size: 1.5rem;
+        color: #0f172a;
+      }
+      .critical-card {
+        border-color: #fecaca;
+        background: #fff1f2;
+      }
+      .warning-card {
+        border-color: #fde68a;
+        background: #fffbeb;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+      thead {
+        background: #f8fafc;
+      }
+      th,
+      td {
+        padding: 14px 16px;
+        border-bottom: 1px solid #e2e8f0;
+        text-align: left;
+      }
+      th {
+        color: #0f172a;
+        font-size: 0.95rem;
+      }
+      td {
+        color: #334155;
+        font-size: 0.94rem;
+      }
+      tbody tr:nth-child(even) {
+        background: #f8fafc;
+      }
+      .badge {
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+      }
+      .critical {
+        background: #fee2e2;
+        color: #b91c1c;
+      }
+      .high {
+        background: #fef3c7;
+        color: #92400e;
+      }
+      .medium {
+        background: #dbeafe;
+        color: #1d4ed8;
+      }
+      .low {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .error {
+        color: #b91c1c;
+        margin-top: 12px;
+      }
+      @media (max-width: 1024px) {
+        .summary-cards {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+      @media (max-width: 760px) {
+        .header {
+          flex-direction: column;
+          text-align: center;
+        }
+        .controls-form {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .summary-cards {
+          grid-template-columns: 1fr;
+        }
+        input {
+          width: 100%;
+        }
+      }
     </style>
   </head>
   <body>
     <div class="card">
       <header class="header">
         <img src="/images/emines.png" alt="Emines logo" class="logo left">
-        <h1>Wind Farm Predictive Maintenance Dashboard</h1>
+        <div class="title-group">
+          <h1>Wind Farm Predictive Maintenance</h1>
+          <p class="subtitle">Select a date to generate turbine risk rankings and maintenance recommendations.</p>
+        </div>
         <img src="/images/uniten.png" alt="Uniten logo" class="logo right">
       </header>
 
-      <p>Review the ranked maintenance priorities for each turbine for a selected date.</p>
-
       <img src="/images/images234.png" alt="Turbine" class="hero">
 
-      <form method="post">
-        <label>
-          Select date
-          <input type="date" name="selected_date" value="{{ selected_date }}">
-        </label>
-        <button type="submit">Generate report</button>
-      </form>
+      <section class="controls-card">
+        <form method="post" class="controls-form">
+          <div class="control-group">
+            <label>Choose date</label>
+            <input type="date" name="selected_date" value="{{ selected_date }}" />
+          </div>
+          <button type="submit">Generate report</button>
+          <button type="submit" formmethod="get" formaction="{{ url_for('download_report') }}">Download PDF</button>
+        </form>
+      </section>
+
+      <section class="summary-cards">
+        <article class="summary-card">
+          <span class="summary-title">Date</span>
+          <strong>{{ summary_metrics.selected_date }}</strong>
+        </article>
+        <article class="summary-card">
+          <span class="summary-title">Turbines analyzed</span>
+          <strong>{{ summary_metrics.total_turbines }}</strong>
+        </article>
+        <article class="summary-card critical-card">
+          <span class="summary-title">Critical</span>
+          <strong>{{ summary_metrics.critical_count }}</strong>
+        </article>
+        <article class="summary-card warning-card">
+          <span class="summary-title">High</span>
+          <strong>{{ summary_metrics.high_count }}</strong>
+        </article>
+        <article class="summary-card">
+          <span class="summary-title">Avg fault probability</span>
+          <strong>{{ "%.4f"|format(summary_metrics.avg_fault_probability) }}</strong>
+        </article>
+      </section>
 
       {% if error_message %}
         <div class="error">{{ error_message }}</div>
