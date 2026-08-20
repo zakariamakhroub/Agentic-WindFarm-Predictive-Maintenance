@@ -1,11 +1,12 @@
 from io import BytesIO
+import os
 
 from flask import Flask, render_template, request, send_file, send_from_directory
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
-from reportlab.platypus import SimpleDocTemplate, Spacer, Table, TableStyle, Paragraph
+from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
 from preprocessing.load_data import DataLoader
 from preprocessing.data_cleaner import DataCleaner
@@ -89,60 +90,137 @@ def download_report():
         bottomMargin=15 * mm,
     )
     styles = getSampleStyleSheet()
+    navy = colors.HexColor("#0b3153")
+    blue = colors.HexColor("#2563eb")
+    muted = colors.HexColor("#475569")
+    border = colors.HexColor("#dbe4ec")
+    image_dir = os.path.join(app.root_path, "preprocessing", "image")
+
+    title_style = ParagraphStyle(
+        "ReportTitle",
+        parent=styles["Title"],
+        fontName="Helvetica-Bold",
+        fontSize=21,
+        leading=25,
+        textColor=navy,
+        alignment=1,
+        spaceAfter=3 * mm,
+    )
+    subtitle_style = ParagraphStyle(
+        "ReportSubtitle",
+        parent=styles["Normal"],
+        fontSize=10,
+        leading=13,
+        textColor=muted,
+        alignment=1,
+    )
+    label_style = ParagraphStyle(
+        "MetricLabel",
+        parent=styles["Normal"],
+        fontSize=7.5,
+        leading=9,
+        textColor=muted,
+        alignment=1,
+    )
+    value_style = ParagraphStyle(
+        "MetricValue",
+        parent=styles["Normal"],
+        fontName="Helvetica-Bold",
+        fontSize=14,
+        leading=16,
+        textColor=navy,
+        alignment=1,
+    )
+    cell_style = ParagraphStyle(
+        "Cell",
+        parent=styles["Normal"],
+        fontSize=7.5,
+        leading=9,
+        textColor=colors.HexColor("#243b53"),
+    )
+    header_cell_style = ParagraphStyle(
+        "HeaderCell",
+        parent=cell_style,
+        fontName="Helvetica-Bold",
+        textColor=colors.white,
+    )
+
+    left_logo = Image(os.path.join(image_dir, "emines.png"), width=43 * mm, height=15 * mm)
+    right_logo = Image(os.path.join(image_dir, "uniten.png"), width=27 * mm, height=15 * mm)
+    header = Table(
+        [[left_logo, [Paragraph("Wind Farm Predictive Maintenance Report", title_style), Paragraph("Daily turbine risk and maintenance schedule", subtitle_style)], right_logo]],
+        colWidths=[48 * mm, 104 * mm, 28 * mm],
+    )
+    header.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("ALIGN", (1, 0), (1, 0), "CENTER"),
+        ("ALIGN", (2, 0), (2, 0), "RIGHT"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+    ]))
+
+    hero = Image(os.path.join(image_dir, "images234.png"), width=180 * mm, height=35 * mm)
+    hero.hAlign = "CENTER"
+    date_banner = Table(
+        [[Paragraph(f"REPORT DATE  <b>{summary_metrics['selected_date']}</b>", ParagraphStyle("DateBanner", parent=cell_style, fontSize=9, textColor=colors.white))]],
+        colWidths=[180 * mm],
+    )
+    date_banner.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), blue),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("TOPPADDING", (0, 0), (-1, -1), 6),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+    ]))
+
+    metric_names = [("Turbines analyzed", "total_turbines"), ("Critical", "critical_count"), ("High", "high_count"), ("Medium", "medium_count"), ("Low", "low_count")]
+    metric_cells = [[Paragraph(name, label_style), Paragraph(str(summary_metrics[key]), value_style)] for name, key in metric_names]
+    metric_cells.append([Paragraph("Avg fault probability", label_style), Paragraph(f"{summary_metrics['avg_fault_probability']:.4f}", value_style)])
+    metrics_table = Table([metric_cells], colWidths=[30 * mm] * 6)
+    metrics_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), colors.white),
+        ("BOX", (0, 0), (-1, -1), 0.7, border),
+        ("INNERGRID", (0, 0), (-1, -1), 0.7, border),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("TOPPADDING", (0, 0), (-1, -1), 7),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
+    ]))
+
     story = [
-        Paragraph("Wind Farm Predictive Maintenance Report", styles["Title"]),
-        Paragraph(f"Selected date: {summary_metrics['selected_date']}", styles["Normal"]),
+        header,
+        Spacer(1, 5 * mm),
+        hero,
+        Spacer(1, 3 * mm),
+        date_banner,
+        Spacer(1, 5 * mm),
+        metrics_table,
         Spacer(1, 8 * mm),
     ]
 
-    metrics_data = [
-        ["Turbines analyzed", "Critical", "High", "Medium", "Low", "Avg fault probability"],
-        [
-            str(summary_metrics["total_turbines"]),
-            str(summary_metrics["critical_count"]),
-            str(summary_metrics["high_count"]),
-            str(summary_metrics["medium_count"]),
-            str(summary_metrics["low_count"]),
-            f"{summary_metrics['avg_fault_probability']:.4f}",
-        ],
-    ]
-    metrics_table = Table(metrics_data, repeatRows=1)
-    metrics_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#17324d")),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#b8c7d3")),
-        ("BACKGROUND", (0, 1), (-1, 1), colors.HexColor("#edf3f6")),
-        ("BOTTOMPADDING", (0, 0), (-1, 0), 7),
-        ("TOPPADDING", (0, 0), (-1, 0), 7),
-    ]))
-    story.extend([metrics_table, Spacer(1, 8 * mm)])
-
-    schedule_data = [["Rank", "Turbine", "Mean probability", "Max probability", "Risk", "Action"]]
+    schedule_data = [[Paragraph(label, header_cell_style) for label in ["Rank", "Turbine", "Mean probability", "Max probability", "Risk", "Action"]]]
     schedule_data.extend([
         [
-            str(item["rank"]),
-            item["turbine_id"],
-            f"{item['mean_fault_probability']:.4f}",
-            f"{item['max_fault_probability']:.4f}",
-            item["risk_level"],
-            item["recommended_action"],
+            Paragraph(str(item["rank"]), cell_style),
+            Paragraph(item["turbine_id"], cell_style),
+            Paragraph(f"{item['mean_fault_probability']:.4f}", cell_style),
+            Paragraph(f"{item['max_fault_probability']:.4f}", cell_style),
+            Paragraph(item["risk_level"], cell_style),
+            Paragraph(item["recommended_action"], cell_style),
         ]
         for item in ranked_schedule
     ])
     if len(schedule_data) == 1:
-        schedule_data.append(["-", "No data", "-", "-", "-", "No maintenance data available"])
+        schedule_data.append([Paragraph(value, cell_style) for value in ["-", "No data", "-", "-", "-", "No maintenance data available"]])
 
     schedule_table = Table(schedule_data, repeatRows=1, colWidths=[12 * mm, 22 * mm, 30 * mm, 30 * mm, 22 * mm, 59 * mm])
     schedule_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#17324d")),
+        ("BACKGROUND", (0, 0), (-1, 0), navy),
         ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#b8c7d3")),
+        ("GRID", (0, 0), (-1, -1), 0.5, border),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
         ("ALIGN", (0, 0), (0, -1), "CENTER"),
-        ("BACKGROUND", (0, 1), (-1, -1), colors.HexColor("#f8fafb")),
         ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f1f5f7")]),
-        ("FONTSIZE", (0, 0), (-1, -1), 8),
         ("TOPPADDING", (0, 0), (-1, -1), 6),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
     ]))
