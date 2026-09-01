@@ -1,8 +1,4 @@
-﻿!data/raw/.gitkeep
-!data/processed/.gitkeep
-!data/windows/.gitkeep
-
-models/*.pkl
+﻿models/*.pkl
 
 __pycache__/
 *.pyc
