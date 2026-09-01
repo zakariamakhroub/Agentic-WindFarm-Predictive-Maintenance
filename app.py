@@ -1,3 +1,4 @@
+from functools import lru_cache
 from io import BytesIO
 import os
 
@@ -28,6 +29,7 @@ def images(filename):
     return send_from_directory("preprocessing/image", filename)
 
 
+@lru_cache(maxsize=64)
 def run_pipeline(selected_date: str):
     loader = DataLoader("data/raw/datasets")
     cleaner = DataCleaner()
@@ -254,10 +256,10 @@ def index():
     if request.method == "POST":
         selected_date = request.form.get("selected_date", selected_date).strip() or selected_date
 
-    try:
-        ranked_schedule, summary_metrics = run_pipeline(selected_date)
-    except Exception as exc:
-        error_message = f"Unable to generate the dashboard: {exc}"
+        try:
+            ranked_schedule, summary_metrics = run_pipeline(selected_date)
+        except Exception as exc:
+            error_message = f"Unable to generate the dashboard: {exc}"
 
     return render_template(
         "index.html",

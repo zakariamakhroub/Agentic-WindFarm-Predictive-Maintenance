@@ -1,13 +1,21 @@
+from functools import lru_cache
+
 import xgboost as xgb
 import pandas as pd
+
+
+@lru_cache(maxsize=1)
+def load_model(model_path):
+    model = xgb.XGBClassifier()
+    model.load_model(model_path)
+    return model
 
 
 class PredictionAgent:
 
     def __init__(self, model_path="models/xgboost_model.json"):
 
-        self.model = xgb.XGBClassifier()
-        self.model.load_model(model_path)
+        self.model = load_model(model_path)
 
     def predict(self, turbine_df: pd.DataFrame):
 
