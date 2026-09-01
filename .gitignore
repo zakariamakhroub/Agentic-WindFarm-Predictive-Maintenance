@@ -1,7 +1,4 @@
-﻿data/raw/*
-data/processed/*
-data/windows/*
-!data/raw/.gitkeep
+﻿!data/raw/.gitkeep
 !data/processed/.gitkeep
 !data/windows/.gitkeep
 
